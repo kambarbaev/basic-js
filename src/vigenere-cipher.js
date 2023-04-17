@@ -20,7 +20,13 @@ const { NotImplementedError } = require('../extensions/index.js');
  * 
  */
 class VigenereCipheringMachine {
+   constructor(direct = true) {
+    this.direct = direct;
+  }
   encrypt(str, key) {
+    if (!str || !key) {
+      throw new Error("Incorrect arguments!");
+    }
     const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
   
     let strArr = str.split('');
@@ -28,78 +34,122 @@ class VigenereCipheringMachine {
     let strIndexArr = [];
     let keyIndexArr = [];
     let encryptArr = [];
-    let resArr = [];
-    
-    for (let i = 0; i < str.length; i++) { // цикл для заполнения strIndexArr
+    let templateArr = [...strArr]
+  
+  for (let i = 0; i < templateArr.length; i++) {
+      if (templateArr[i].match(/[a-zA-Z]/)) {
+          templateArr[i]='';
+      }
+  }
+    for (let i = 0; i < str.length; i++) {
       const strItem = str[i].toUpperCase();
-      for (let j = 0; j  < ABC.length; j ++) {
+      for (let j = 0; j < ABC.length; j++) {
         const abcItem = ABC[j];
         if (strItem === abcItem) {
-          strIndexArr.push(j)
-        }
-      }
-    }
-  
-  
-    for (let i = 0; i < key.length; i++) {
-      for (let j = 0; j < key.length; j++) {
-        const element = key[j];
-        ABC.forEach((e,i) => { e === element ?  keyIndexArr.push(i) : null
-          }
-        );
-        if (keyIndexArr.length === strArr.length) {
+          strIndexArr.push(j);
           break;
         }
       }
     }
   
-    for (let i = 0; i < strArr.length; i++) {
-      let original = strIndexArr[i];
-      let encrypt = keyIndexArr[i];
-      let mod26 = 26;
-      if (original + encrypt > mod26) {
-        encryptArr.push(ABC[(original + encrypt) - mod26])
-      }else {
-        encryptArr.push(ABC[original + encrypt]);
+    for (let i = 0; i < key.length; i++) {
+      const keyItem = key[i].toUpperCase();
+      for (let j = 0; j < ABC.length; j++) {
+        const abcItem = ABC[j];
+        if (keyItem === abcItem) {
+          keyIndexArr.push(j);
+          break;
+        }
       }
-  
     }
   
-    // for (let i= 0; i < strArr.length; i++){
-    //   if(i >= keyArr.length && i < strArr.length){
-    //       let index = ABC.indexOf(keyArr[i-(keyArr.length)*[Math.floor(i/keyArr.length)]]);
-    //       // let index = arr.indexOf(cipher[i-(cipher.length*[Math.floor(i/cipher.length)])]);
-    //       keyIndexArr.push(index);
-    //   } else {
-    //     let index = ABC.indexOf(keyArr[i]);
-    //     keyIndexArr.push(index);
-    //   }
-    // }
   
+    for (let i = 0; i < strIndexArr.length; i++) {
+      let original = strIndexArr[i];
+      let encrypt = keyIndexArr[i % keyIndexArr.length];
+      let mod26 = 26;
   
-  console.log(strArr);
-  console.log(keyArr);
-  console.log(strIndexArr);
-  console.log(keyIndexArr);
-  console.log('****');
-  console.log(resArr);
-  console.log('****');
-  console.log(encryptArr);
+        if (original + encrypt > mod26 - 1) {
+          encryptArr.push(ABC[(original + encrypt) - mod26]);
+        } else {
+          encryptArr.push(ABC[original + encrypt]);
+        }
+      }
   
-  
-  
-  encrypt('PROGRAM', 'DOG');
-  encrypt('attack at dawn!', 'alphonse');
-  encrypt('Example of sequence: 1, 2, 3, 4.', 'lilkey');
-  
-    // remove line with error and write your code here
+  let count =0
+  for(let i=0; i < templateArr.length; i++ ){
+      if(templateArr[i]=== ''){
+          templateArr[i]=encryptArr[count]
+          count++
+      }
+    }
+    return this.direct ? templateArr.join('') : templateArr.reverse().join('');
   }
   
   
-  decrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  decrypt(str, key) {
+    if (!str || !key) {
+      throw new Error("Incorrect arguments!");
+    }
+    const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+  
+    let strArr = str.split('');
+    let keyArr = key.split('');
+    let strIndexArr = [];
+    let keyIndexArr = [];
+    let encryptArr = [];
+    let templateArr = [...strArr]
+  
+  for (let i = 0; i < templateArr.length; i++) {
+      if (templateArr[i].match(/[a-zA-Z]/)) {
+          templateArr[i]='';
+      }
   }
+    for (let i = 0; i < str.length; i++) {
+      const strItem = str[i].toUpperCase();
+      for (let j = 0; j < ABC.length; j++) {
+        const abcItem = ABC[j];
+        if (strItem === abcItem) {
+          strIndexArr.push(j);
+          break;
+        }
+      }
+    }
+  
+    for (let i = 0; i < key.length; i++) {
+      const keyItem = key[i].toUpperCase();
+      for (let j = 0; j < ABC.length; j++) {
+        const abcItem = ABC[j];
+        if (keyItem === abcItem) {
+          keyIndexArr.push(j);
+          break;
+        }
+      }
+    }
+  
+  
+    for (let i = 0; i < strIndexArr.length; i++) {
+      let original = strIndexArr[i];
+      let encrypt = keyIndexArr[i % keyIndexArr.length];
+      let mod26 = 26;
+  
+        if (original - encrypt < 0) { 
+          encryptArr.push(ABC[(original + mod26) - encrypt]);
+        } else {
+          encryptArr.push(ABC[original - encrypt]);
+        }
+      }
+  
+  let count =0
+  for(let i=0; i < templateArr.length; i++ ){
+      if(templateArr[i]=== ''){
+          templateArr[i]=encryptArr[count]
+          count++
+      }
+    }
+    return this.direct ? templateArr.join('') : templateArr.reverse().join('');
+  }
+  
 }
 
 module.exports = {
